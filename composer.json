@@ -31,5 +31,13 @@
     "allow-plugins": {
       "phpstan/extension-installer": true
     }
-  }
+  },
+  "autoload": {
+    "psr-4": {
+      "hexlet\\code\\": "public/index.php"
+    }
+  },
+  "bin": [
+    "public/index.php"
+  ]  
 }
