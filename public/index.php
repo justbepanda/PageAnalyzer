@@ -4,6 +4,9 @@ namespace Hexlet\Code;
 
 require __DIR__ . '/../vendor/autoload.php';
 
+// sudo kill -9 `sudo lsof -t -i:8080`
+// php -S localhost:8080 -t public public/index.php
+
 use Slim\Factory\AppFactory;
 use Slim\Middleware\MethodOverrideMiddleware;
 use DI\Container;

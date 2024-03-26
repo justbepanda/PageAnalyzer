@@ -1,0 +1,26 @@
+name: app-check
+on: push
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@master
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          coverage: xdebug
+      - run: make install
+      - run: make lint
+      - run: make test
+      - name: Test & publish code coverage
+        uses: paambaati/codeclimate-action@v5.0.0
+        env:
+          # Set CC_TEST_REPORTER_ID as secret of your repo
+          CC_TEST_REPORTER_ID: ${{secrets.CC_TEST_REPORTER_ID}}
+
+        with:
+          # The report file must be there, otherwise Code Climate won't find it
+          coverageCommand: make test-coverage
+          coverageLocations: ${{github.workspace}}/build/logs/clover.xml:clover
