@@ -1,11 +1,23 @@
 {
   "name": "php-project-9",
   "version": "1.0.0",
-  "description": "[![Actions Status](https://github.com/justbepanda/php-project-9/actions/workflows/hexlet-check.yml/badge.svg)](https://github.com/justbepanda/php-project-9/actions)",
-  "main": "index.js",
+  "description": "",
+  "main": "src/js/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "bootstrap": "^5.3.3",
+    "gulp": "^5.0.0",
+    "gulp-cli": "^3.0.0",
+    "browser-sync": "^3.0.2",
+    "gulp-clean-css": "^4.3.0",
+    "gulp-concat": "^2.6.1",
+    "gulp-pug": "^5.0.0",
+    "gulp-sass": "^5.1.0",
+    "pug": "^3.0.2",
+    "sass": "^1.75.0"
+  }
 }
