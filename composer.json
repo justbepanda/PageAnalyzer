@@ -17,7 +17,8 @@
     "slim/flash": "^0.4.0",
     "php-di/php-di": "^7.0",
     "symfony/string": "^6.4",
-    "illuminate/collections": "^10.48"
+    "illuminate/collections": "^10.48",
+    "slim/twig-view": "^3.3"
   },
   "require-dev": {
     "phpunit/phpunit": "^10.5",
