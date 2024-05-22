@@ -1,4 +1,4 @@
-name: app-check
+name: src-check
 on: push
 jobs:
   build:

@@ -3,9 +3,6 @@ PORT ?= 8000
 start:
 	php -S 0.0.0.0:$(PORT) -t public public/index.php
 
-local-start:
-	php -S localhost:8000 -t public public/index.php
-
 install:
 	composer install
 

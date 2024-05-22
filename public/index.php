@@ -9,7 +9,8 @@ use Slim\Factory\AppFactory;
 use Slim\Views\Twig;
 use Slim\Views\TwigMiddleware;
 
-session_start();
+
+//session_start();
 
 // Create Container
 $container = new Container();
@@ -31,13 +32,12 @@ $app = AppFactory::create();
 $app->add(TwigMiddleware::createFromContainer($app));
 
 
-
 // Show errors
 $app->addErrorMiddleware(true, true, true);
 
 // Define named route
 $app->get('/', function ($request, $response, $args) {
     return $this->get('view')->render($response, 'index.html.twig');
-})->setName('profile');
+})->setName('index');
 
 $app->run();
