@@ -2,9 +2,6 @@
 
 namespace Hexlet\Code;
 
-require 'vendor/autoload.php';
-
-
 /**
  * Создание класса Connection
  */
@@ -44,7 +41,7 @@ class Connection
             $username,
             $password
         );
-        
+
         $pdo = new \PDO($conStr);
 
         $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
@@ -67,6 +64,5 @@ class Connection
 
     protected function __construct()
     {
-
     }
 }

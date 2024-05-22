@@ -11,7 +11,7 @@ console:
 
 lint:
 	composer exec --verbose phpcs -- --standard=PSR12 src tests
-	composer exec --verbose phpstan
+	composer exec --verbose phpstan -- analyse src tests
 
 lint-fix:
 	composer exec --verbose phpcbf -- --standard=PSR12 src tests
