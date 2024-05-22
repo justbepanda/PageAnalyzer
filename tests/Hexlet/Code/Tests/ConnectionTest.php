@@ -7,8 +7,6 @@ require dirname(__DIR__, 4) . '/vendor/autoload.php';
 use PHPUnit\Framework\TestCase;
 use Hexlet\Code\Connection;
 
-
-
 class ConnectionTest extends TestCase
 {
     public function testConnect()
