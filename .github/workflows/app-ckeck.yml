@@ -41,6 +41,7 @@ jobs:
       - name: Run tests
         env:
           DATABASE_URL: postgresql://mof:postgres@localhost:5432/project9_dev
+          echo "DATABASE_URL in context: ${GITHUB_CONTEXT.DATABASE_URL}"
         run: make test
         
       - name: Test & publish code coverage
