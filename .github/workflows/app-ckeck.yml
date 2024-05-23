@@ -37,9 +37,6 @@ jobs:
           DATABASE_URL: postgresql://mof:postgres@localhost:5432/project9_dev
         run: psql -d $DATABASE_URL -f database.sql
       - run: make lint
-
-      - name: Echo variable value
-        run: echo "Value of DATABASE_URL: $DATABASE_URL"
         
       - name: Run tests
         env:

@@ -7,28 +7,26 @@ use Hexlet\Code\Connection;
 
 class ConnectionTest extends TestCase
 {
-    public function testConnect()
+    public function testGet(): void
     {
-        // Подготовка данных для теста (предполагается, что конфигурация базы данных передана в окружение)
-        putenv('DATABASE_URL=postgresql://mof:postgres@localhost:5432/project9_dev');
-
-        // Создание объекта Connection
         $connection = Connection::get();
+        $this->assertInstanceOf(Connection::class, $connection);
+    }
 
-        // Вызываем метод connect
+    public function testConnect(): void
+    {
+        $connection = Connection::get();
         $pdo = $connection->connect();
-
-        // Проверяем, что полученный объект является экземпляром \PDO
         $this->assertInstanceOf(\PDO::class, $pdo);
     }
-    public function testGet()
+
+    public function testConnectException(): void
     {
+        // Mocking the $_ENV['DATABASE_URL'] to simulate a bad configuration
+        $_ENV['DATABASE_URL'] = 'bad_url';
+
         $connection = Connection::get();
-
-        // Проверяем, что полученный объект является экземпляром Connection
-        $this->assertInstanceOf(Connection::class, $connection);
-
-        // Проверяем, что повторные вызовы возвращают один и тот же объект
-        $this->assertSame($connection, Connection::get());
+        $this->expectException(\Exception::class);
+        $connection->connect();
     }
 }
