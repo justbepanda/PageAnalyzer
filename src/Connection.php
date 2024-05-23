@@ -22,12 +22,13 @@ class Connection
     {
         $dotenv = \Dotenv\Dotenv::createImmutable(__DIR__ . '/../');
         $dotenv->load();
+        
         $databaseUrl = $_ENV['DATABASE_URL'];
         $urlParts = parse_url($databaseUrl);
         $username = $urlParts['user'];
         $password = $urlParts['pass'];
         $host = $urlParts['host'];
-        $port = $urlParts['port'];
+        $port = isset($urlParts['port']) ? $urlParts['port'] : null;  // Проверка наличия ключа 'port'
         $dbName = ltrim($urlParts['path'], '/');
 
 
