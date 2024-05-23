@@ -2,33 +2,56 @@
 
 namespace Hexlet\Code\Tests;
 
-use PHPUnit\Framework\TestCase;
 use Hexlet\Code\Connection;
+use PHPUnit\Framework\TestCase;
+use PDO;
+use PDOException;
 
 class ConnectionTest extends TestCase
 {
+    /**
+     * Тест успешного подключения к базе данных
+     */
     public function testConnect()
     {
-        // Подготовка данных для теста (предполагается, что конфигурация базы данных передана в окружение)
-        putenv('DATABASE_URL=pgsql:host=localhost;port=5432;dbname=test_db;user=test_pass;password=test_pass');
+        $pdo = Connection::get();
 
-        // Создание объекта Connection
-        $connection = Connection::get();
+        $this->assertInstanceOf(PDO::class, $pdo, "Connection::get() should return instance of PDO");
 
-        // Вызываем метод connect
-        $pdo = $connection->connect();
-
-        // Проверяем, что полученный объект является экземпляром \PDO
-        $this->assertInstanceOf(\PDO::class, $pdo);
+        try {
+            $pdo->query('SELECT 1');
+            $this->assertTrue(true, "Connection is successful and SELECT 1 query executed");
+        } catch (PDOException $e) {
+            $this->fail("Connection failed: " . $e->getMessage());
+        }
     }
-    public function testGet()
+
+    /**
+     * Тест выполнения SQL-запроса
+     */
+    public function testExecuteQuery()
     {
-        $connection = Connection::get();
+        $pdo = Connection::get();
 
-        // Проверяем, что полученный объект является экземпляром Connection
-        $this->assertInstanceOf(Connection::class, $connection);
+        // Убедитесь, что таблица существует
+        $createQuery = 'CREATE TABLE IF NOT EXISTS test_table (id SERIAL PRIMARY KEY, name VARCHAR(255))';
+        $pdo->exec($createQuery);
 
-        // Проверяем, что повторные вызовы возвращают один и тот же объект
-        $this->assertSame($connection, Connection::get());
+        // Вставка записи
+        $insertQuery = 'INSERT INTO test_table (name) VALUES (:name)';
+        $stmt = $pdo->prepare($insertQuery);
+        $stmt->execute(['name' => 'Test Name']);
+
+        // Проверка вставки записи
+        $selectQuery = 'SELECT name FROM test_table WHERE name = :name';
+        $stmt = $pdo->prepare($selectQuery);
+        $stmt->execute(['name' => 'Test Name']);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        $this->assertNotEmpty($result, "The inserted row should be found in the database");
+        $this->assertEquals('Test Name', $result['name'], "The inserted name should match the query");
+
+        // Очистка таблицы
+        $pdo->exec('DROP TABLE test_table');
     }
 }
