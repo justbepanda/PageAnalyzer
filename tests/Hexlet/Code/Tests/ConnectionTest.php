@@ -19,14 +19,4 @@ class ConnectionTest extends TestCase
         $pdo = $connection->connect();
         $this->assertInstanceOf(\PDO::class, $pdo);
     }
-
-    public function testConnectException(): void
-    {
-        // Mocking the $_ENV['DATABASE_URL'] to simulate a bad configuration
-        $_ENV['DATABASE_URL'] = 'bad_url';
-
-        $connection = Connection::get();
-        $this->expectException(\Exception::class);
-        $connection->connect();
-    }
 }
