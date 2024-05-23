@@ -9,9 +9,9 @@ jobs:
         ports:
           - 5432:5432
         env:
-          POSTGRES_DB: mydb_test
-          POSTGRES_USER: janedoe
-          POSTGRES_PASSWORD: mypassword
+          POSTGRES_DB: project9_dev
+          POSTGRES_USER: mof
+          POSTGRES_PASSWORD: postgres
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
