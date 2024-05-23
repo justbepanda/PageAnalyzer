@@ -22,16 +22,14 @@ class Connection
     {
         $dotenv = \Dotenv\Dotenv::createImmutable(__DIR__ . '/../');
         $dotenv->load();
-        $databaseUrl = parse_url($_ENV['DATABASE_URL']);
-        if ($databaseUrl === false) {
-            throw new \Exception("Error reading database configuration file");
-        }
+        $databaseUrl = $_ENV['DATABASE_URL'];
+        $urlParts = parse_url($databaseUrl);
+        $username = $urlParts['user'];
+        $password = $urlParts['pass'];
+        $host = $urlParts['host'];
+        $port = $urlParts['port'];
+        $dbName = ltrim($urlParts['path'], '/');
 
-        $username = $databaseUrl['user'];
-        $password = $databaseUrl['pass'];
-        $host = $databaseUrl['host'];
-        $port = $databaseUrl['port'];
-        $dbName = ltrim($databaseUrl['path'], '/'); // mydb
 
         $conStr = sprintf(
             "pgsql:host=%s;port=%d;dbname=%s;user=%s;password=%s",
