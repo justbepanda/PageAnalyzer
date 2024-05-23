@@ -3,6 +3,20 @@ on: push
 jobs:
   build:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:latest
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_DB: mydb_test
+          POSTGRES_USER: janedoe
+          POSTGRES_PASSWORD: mypassword
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@master
@@ -11,11 +25,22 @@ jobs:
         with:
           php-version: '8.3'
           coverage: xdebug
-      - run: make install
+          extensions: pdo, pdo_pgsql
+      - name: Install dependencies
+        run: make install
+      - name: Set up database
+        env:
+          DATABASE_URL: postgresql://mof:postgres@localhost:5432/project9_dev
+        run: psql -d $DATABASE_URL -f database.sql
       - run: make lint
-      - run: make test
+      - name: Run tests
+        env:
+          DATABASE_URL: postgresql://mof:postgres@localhost:5432/project9_dev
+        run: make test
       - name: Test & publish code coverage
         uses: paambaati/codeclimate-action@v5.0.0
+        env:
+          DATABASE_URL: postgresql://mof:postgres@localhost:5432/project9_dev
         env:
           # Set CC_TEST_REPORTER_ID as secret of your repo
           CC_TEST_REPORTER_ID: ${{secrets.CC_TEST_REPORTER_ID}}
