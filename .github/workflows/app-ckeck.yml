@@ -25,7 +25,7 @@ jobs:
         with:
           php-version: '8.3'
           coverage: xdebug
-          extensions: pdo, pdo_pgsql
+          extensions: pdo, pdo_pgsql, xdebug
       - name: Install dependencies
         run: make install
 
