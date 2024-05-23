@@ -2,6 +2,10 @@
 
 namespace Hexlet\Code;
 
+use PDO;
+use PDOException;
+use Dotenv\Dotenv;
+
 /**
  * Создание класса Connection
  */
@@ -11,7 +15,8 @@ class Connection
      * Connection
      * тип @var
      */
-    private static ?Connection $conn = null;
+    private static ?Connection $instance = null;
+    private ?PDO $pdo = null;
 
     /**
      * Подключение к базе данных и возврат экземпляра объекта \PDO
@@ -20,46 +25,50 @@ class Connection
      */
     public function connect(): \PDO
     {
-        $dotenv = \Dotenv\Dotenv::createImmutable(__DIR__ . '/../');
-        $dotenv->load();
-        $databaseUrl = parse_url($_ENV['DATABASE_URL']);
-        if ($databaseUrl === false) {
-            throw new \Exception("Error reading database configuration file");
+        if ($this->pdo === null) {
+            $dotenv = Dotenv::createImmutable(__DIR__ . '/../');
+            $dotenv->load();
+
+            $databaseUrl = parse_url($_ENV['DATABASE_URL']);
+            if ($databaseUrl === false) {
+                throw new \Exception("Error reading database configuration file");
+            }
+
+            $username = $databaseUrl['user'];
+            $password = $databaseUrl['pass'];
+            $host = $databaseUrl['host'];
+            $port = $databaseUrl['port'];
+            $dbName = ltrim($databaseUrl['path'], '/');
+
+            $dsn = sprintf(
+                "pgsql:host=%s;port=%d;dbname=%s",
+                $host,
+                $port,
+                $dbName
+            );
+
+            try {
+                $this->pdo = new PDO($dsn, $username, $password);
+                $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            } catch (PDOException $e) {
+                throw new \Exception('Connection failed: ' . $e->getMessage());
+            }
         }
 
-        $username = $databaseUrl['user']; // janedoe
-        $password = $databaseUrl['pass']; // mypassword
-        $host = $databaseUrl['host']; // localhost
-        $port = $databaseUrl['port']; // 5432
-        $dbName = ltrim($databaseUrl['path'], '/'); // mydb
-
-        $conStr = sprintf(
-            "pgsql:host=%s;port=%d;dbname=%s;user=%s;password=%s",
-            $host,
-            $port,
-            $dbName,
-            $username,
-            $password
-        );
-
-        $pdo = new \PDO($conStr);
-
-        $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
-
-        return $pdo;
+        return $this->pdo;
     }
 
     /**
-     * возврат экземпляра объекта Connection
-     * тип @return
+     * Возврат экземпляра объекта Connection
+     * @return \PDO|null
      */
-    public static function get(): ?Connection
+    public static function get(): ?PDO
     {
-        if (null === static::$conn) {
-            static::$conn = new self();
+        if (static::$instance === null) {
+            static::$instance = new self();
         }
 
-        return static::$conn;
+        return static::$instance->connect();
     }
 
     protected function __construct()
