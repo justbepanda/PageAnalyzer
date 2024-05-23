@@ -43,7 +43,9 @@ jobs:
       - name: Run tests
         env:
           DATABASE_URL: postgresql://mof:postgres@localhost:5432/project9_dev
-        run: make test
+        run: 
+          echo "::add-mask::$DATABASE_URL"  
+          make test
         
       - name: Test & publish code coverage
         uses: paambaati/codeclimate-action@v5.0.0          

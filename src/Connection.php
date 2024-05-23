@@ -24,7 +24,6 @@ class Connection
         $dotenv->load();
 
         $databaseUrl = $_ENV['DATABASE_URL'];
-        dump($databaseUrl);
         $urlParts = parse_url($databaseUrl);
         $username = $urlParts['user'];
         $password = $urlParts['pass'];
