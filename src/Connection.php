@@ -22,7 +22,8 @@ class Connection
     {
         $dotenv = \Dotenv\Dotenv::createImmutable(__DIR__ . '/../');
         $dotenv->load();
-
+        echo '!!!';
+        echo getenv('DATABASE_URL');
         $databaseUrl = $_ENV['DATABASE_URL'];
         $urlParts = parse_url($databaseUrl);
         $username = $urlParts['user'];
