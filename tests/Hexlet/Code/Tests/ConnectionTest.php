@@ -9,12 +9,14 @@ class ConnectionTest extends TestCase
 {
     public function testGet(): void
     {
+        putenv("DATABASE_URL=postgresql://mof:postgres@localhost:5432/project9_dev");
         $connection = Connection::get();
         $this->assertInstanceOf(Connection::class, $connection);
     }
 
     public function testConnect(): void
     {
+        putenv("DATABASE_URL=postgresql://mof:postgres@localhost:5432/project9_dev");
         $connection = Connection::get();
         $pdo = $connection->connect();
         $this->assertInstanceOf(\PDO::class, $pdo);
