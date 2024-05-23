@@ -10,7 +10,7 @@ class ConnectionTest extends TestCase
     public function testConnect()
     {
         // Подготовка данных для теста (предполагается, что конфигурация базы данных передана в окружение)
-        putenv('DATABASE_URL=pgsql:host=localhost;port=5432;dbname=test_db;user=test_pass;password=test_pass');
+        putenv('DATABASE_URL=postgresql://mof:postgres@localhost:5432/project9_dev');
 
         // Создание объекта Connection
         $connection = Connection::get();
