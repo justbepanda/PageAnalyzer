@@ -37,14 +37,18 @@ jobs:
           DATABASE_URL: postgresql://mof:postgres@localhost:5432/project9_dev
         run: psql -d $DATABASE_URL -f database.sql
       - run: make lint
+
+      - name: Echo variable value
+        run: echo "Value of DATABASE_URL: $DATABASE_URL"
+        
       - name: Run tests
         env:
           DATABASE_URL: postgresql://mof:postgres@localhost:5432/project9_dev
         run: make test
+        
       - name: Test & publish code coverage
         uses: paambaati/codeclimate-action@v5.0.0          
         env:
-          DATABASE_URL: postgresql://mof:postgres@localhost:5432/project9_dev
           # Set CC_TEST_REPORTER_ID as secret of your repo
           CC_TEST_REPORTER_ID: ${{secrets.CC_TEST_REPORTER_ID}}
 
