@@ -38,10 +38,9 @@ jobs:
           DATABASE_URL: postgresql://mof:postgres@localhost:5432/project9_dev
         run: make test
       - name: Test & publish code coverage
-        uses: paambaati/codeclimate-action@v5.0.0
+        uses: paambaati/codeclimate-action@v5.0.0          
         env:
           DATABASE_URL: postgresql://mof:postgres@localhost:5432/project9_dev
-        env:
           # Set CC_TEST_REPORTER_ID as secret of your repo
           CC_TEST_REPORTER_ID: ${{secrets.CC_TEST_REPORTER_ID}}
 
