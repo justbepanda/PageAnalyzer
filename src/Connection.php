@@ -27,7 +27,7 @@ class Connection
         $username = $urlParts['user'];
         $password = $urlParts['pass'];
         $host = $urlParts['host'];
-        $port = isset($urlParts['port']) ? $urlParts['port'] : null;  // Проверка наличия ключа 'port'
+        $port = $urlParts['port'] ?? null; 
         $dbName = ltrim($urlParts['path'], '/');
 
 
