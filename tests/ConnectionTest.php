@@ -2,8 +2,8 @@
 
 namespace Hexlet\Code\Tests;
 
-use PHPUnit\Framework\TestCase;
 use Hexlet\Code\Connection;
+use PHPUnit\Framework\TestCase;
 
 class ConnectionTest extends TestCase
 {

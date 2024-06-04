@@ -27,7 +27,7 @@ class Connection
         $username = $urlParts['user'];
         $password = $urlParts['pass'];
         $host = $urlParts['host'];
-        $port = $urlParts['port'] ?? null; 
+        $port = $urlParts['port'] ?? null;
         $dbName = ltrim($urlParts['path'], '/');
 
 

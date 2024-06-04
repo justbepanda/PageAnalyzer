@@ -28,3 +28,11 @@
         </div>
     </nav>
 </header>
+{% if flash is not empty %}
+    {% for message in flash %}
+    <div class="alert alert-success" role="alert">
+        {{ message|first }}
+    </div>
+    {% endfor %}
+{% endif %}
+
