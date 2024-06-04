@@ -12,15 +12,14 @@ use Slim\Views\TwigMiddleware;
 use Slim\Flash\Messages;
 use Carbon\Carbon;
 
+session_start();
+
 try {
     $pdo = Connection::get()->connect();
     $urlRepo = new UrlRepository($pdo);
 } catch (\PDOException $e) {
     echo $e->getMessage();
 }
-
-
-session_start();
 
 // Create Container
 $container = new Container();
