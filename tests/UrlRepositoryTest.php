@@ -41,7 +41,7 @@ class UrlRepositoryTest extends TestCase
 
         $this->pdoMock->shouldReceive('prepare')
             ->once()
-            ->with("INSERT INTO urls (name, created_at) VALUES(:name, :createdAt)")
+            ->with("INSERT INTO urls (name, created_at) VALUES(:name, :created)")
             ->andReturn($this->pdoStmtMock);
 
         $this->pdoStmtMock->shouldReceive('bindParam')
