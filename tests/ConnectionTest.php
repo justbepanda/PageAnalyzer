@@ -2,6 +2,7 @@
 
 namespace Hexlet\Code\Tests;
 
+use Exception;
 use Hexlet\Code\Connection;
 use PHPUnit\Framework\TestCase;
 
@@ -13,6 +14,9 @@ class ConnectionTest extends TestCase
         $this->assertInstanceOf(Connection::class, $connection);
     }
 
+    /**
+     * @throws Exception
+     */
     public function testConnect(): void
     {
         $connection = Connection::get();
