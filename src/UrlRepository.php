@@ -21,7 +21,7 @@ class UrlRepository
 
     public function insert($name, $created): false|string
     {
-        $sql = "INSERT INTO urls (name, created_at) VALUES(:name, :createdAt)";
+        $sql = "INSERT INTO urls (name, created_at) VALUES(:name, :created)";
 
         $stmt = $this->pdo->prepare($sql);
 
