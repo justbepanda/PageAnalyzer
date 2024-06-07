@@ -49,10 +49,12 @@ class UrlChecker
         return $this->pdo->lastInsertId();
     }
 
-    public function all()
+    public function allByUrlId($urlId)
     {
-        $sql = "SELECT * FROM url_checks";
-        $stmt = $this->pdo->query($sql);
+        $sql = "SELECT * FROM url_checks WHERE url_id = :url_id ORDER BY created_at";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->bindParam(':url_id', $urlId);
+        $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 

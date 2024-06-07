@@ -61,7 +61,7 @@ $app->get('/', function ($request, $response) {
 
 $app->get('/urls/{id}', function ($request, $response, $args) use ($urlRepo, $checksRepo) {
     $messages = $this->get('flash')->getMessages();
-    $checks = $checksRepo->all() ?? null;
+    $checks = $checksRepo->allByUrlId($args['id']);
     if ($checks) {
         $sortedChecks = Arr::sortDesc($checks, function ($value) {
             return $value['created_at'];
@@ -95,7 +95,7 @@ $app->get('/urls', function ($request, $response) use ($urlRepo, $checksRepo) {
     $data = [
         'urls' => $urlsPreparedForPage
     ];
-    // file_put_contents('debug.log', print_r($data, true), FILE_APPEND);
+
     return $this->get('view')->render($response, 'urls.html.twig', $data);
 })->setName('urls.show');
 
@@ -137,9 +137,11 @@ $app->post('/urls', function ($request, $response) use ($router, $urlRepo) {
 
 })->setName('url.add');
 
-$app->post('/urls/{url_id}/checks', function ($request, $response, $args) use ($pdo, $router, $checksRepo, $urlRepo) {
+$app->post('/urls/{url_id}/checks', function ($request, $response, $args) use ($router, $checksRepo, $urlRepo) {
     $createdAt = Carbon::now()->toDateTimeString();
     $url_id = $args['url_id'];
+//    file_put_contents('debug.log', print_r($url_id, true), FILE_APPEND);
+
     $name = $urlRepo->findById($url_id)[0]['name'];
     $responseData = $checksRepo->checkUrl($name);
     $statusCode = $responseData['statusCode'];
@@ -150,7 +152,7 @@ $app->post('/urls/{url_id}/checks', function ($request, $response, $args) use ($
     $checksRepo->insert($url_id, $statusCode, $h1, $title, $description, $createdAt);
 
     $this->get('flash')->addMessage('success', 'Страница успешно проверена');
-    $args['id'] = $url_id;
+    $args['id'] = $args['url_id'];
     return $response->withRedirect($router->urlFor('url.show', $args));
 
 })->setName('checks.add');
