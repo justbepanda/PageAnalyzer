@@ -143,8 +143,11 @@ $app->post('/urls/{url_id}/checks', function ($request, $response, $args) use ($
     $name = $urlRepo->findById($url_id)[0]['name'];
     $responseData = $checksRepo->checkUrl($name);
     $statusCode = $responseData['statusCode'];
+    $title = $responseData['title'] ?? '';
+    $h1 = $responseData['h1'] ?? '';
+    $description = $responseData['description'] ?? '';
 
-    $checksRepo->insert($url_id, $statusCode, $createdAt);
+    $checksRepo->insert($url_id, $statusCode, $h1, $title, $description, $createdAt);
 
     $this->get('flash')->addMessage('success', 'Страница успешно проверена');
     $args['id'] = $url_id;
