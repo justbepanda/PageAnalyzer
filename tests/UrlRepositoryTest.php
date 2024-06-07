@@ -19,9 +19,7 @@ class UrlRepositoryTest extends TestCase
         parent::setUp();
 
         $this->pdoMock = Mockery::mock(PDO::class);
-
         $this->pdoStmtMock = Mockery::mock(PDOStatement::class);
-
         $this->UrlRepository = new UrlRepository($this->pdoMock);
     }
 

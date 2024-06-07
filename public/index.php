@@ -17,6 +17,8 @@ session_start();
 try {
     $pdo = Connection::get()->connect();
     $urlRepo = new UrlRepository($pdo);
+    $checksRepo = new UrlChecker($pdo);
+
 } catch (\PDOException $e) {
     echo $e->getMessage();
 }
@@ -49,34 +51,40 @@ $router = $app->getRouteCollector()->getRouteParser();
 // Define named route
 $app->get('/', function ($request, $response) {
     $flash = $this->get('flash')->getMessages();
-//    dump($flash);
     $params = [
         'flash' => $flash
     ];
     return $this->get('view')->render($response, 'index.html.twig', $params);
 })->setName('home');
 
-$app->get('/urls', function ($request, $response) use ($urlRepo) {
+$app->get('/urls', function ($request, $response) use ($urlRepo, $checksRepo) {
     $urls = $urlRepo->all();
     $sortedUrls = Arr::sortDesc($urls, function ($value) {
         return $value['created_at'];
     });
+
+    $urlsPreparedForPage = Arr::map($sortedUrls, function ($value) use ($checksRepo) {
+        $lastUrlCheck = $checksRepo->lastByUrlId($value['id']);
+        $lastUrlCheckCreatedAt = $lastUrlCheck[0]['created_at'];
+        $value['lastCheckCreatedAt'] = $lastUrlCheckCreatedAt;
+        return $value;
+    });
     $data = [
-        'urls' => $sortedUrls
+        'urls' => $urlsPreparedForPage
     ];
-//    file_put_contents('debug.log', print_r($data, true), FILE_APPEND);
+    // file_put_contents('debug.log', print_r($data, true), FILE_APPEND);
     return $this->get('view')->render($response, 'urls.html.twig', $data);
 })->setName('urls.show');
 
-$app->get('/urls/{id}', function ($request, $response, $args) use ($urlRepo) {
+$app->get('/urls/{id}', function ($request, $response, $args) use ($urlRepo, $checksRepo) {
     $messages = $this->get('flash')->getMessages();
-
+    $checks = $checksRepo->all() ?? null;
     $params = [
         'urlData' => $urlRepo->findById($args['id'])[0],
         'errors' => [],
-        'flash' => $messages ?? []
+        'flash' => $messages ?? [],
+        'checks' => $checks
     ];
-
     return $this->get('view')->render($response, 'url.html.twig', $params);
 })->setName('url.show');
 
@@ -87,7 +95,7 @@ $app->post('/urls', function ($request, $response) use ($router, $urlRepo) {
     $validator = new UrlValidator();
     $normalizedUrl = $validator->normalize($url);
 
-    // if url exits, redirect to exits id
+    // if url exits, redirect to existing id
     $existingUrl = $urlRepo->findByName($normalizedUrl);
     if ($existingUrl) {
         $redirectId = $existingUrl[0]['id'];
@@ -117,6 +125,18 @@ $app->post('/urls', function ($request, $response) use ($router, $urlRepo) {
     return $this->get('view')->render($response->withStatus(422), 'index.html.twig', $params);
 
 })->setName('url.add');
+
+$app->post('/urls/{url_id}/checks', function ($request, $response, $args) use ($pdo, $router, $checksRepo) {
+    $createdAt = Carbon::now()->toDateTimeString();
+    $url_id = $args['url_id'];
+
+    $checksRepo->insert($url_id, $createdAt);
+
+    $this->get('flash')->addMessage('success', 'Страница успешно проверена');
+    $args['id'] = $url_id;
+    return $response->withRedirect($router->urlFor('url.show', $args));
+
+})->setName('checks.add');
 
 
 $app->run();

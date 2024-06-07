@@ -17,16 +17,22 @@
                 {% if urls is not empty %}
                     {% for url in urls %}
                         <tr>
-                            <td>{{ url['id'] }}</td>
+                            <td>
+                                {{ url['id'] }}
+                            </td>
                             <td>
                                 <a href="/urls/{{ url['id'] }}">
                                     {{ url['name'] }}
                                 </a>
                             </td>
-                            <td></td>
+                            <td>
+                                {% if url['lastCheckCreatedAt'] is not null %}
+                                    {{ url['lastCheckCreatedAt'] }}
+                                {% endif %}
+                            </td>
                             <td></td>
                         </tr>
-                        
+
                     {% endfor %}
                 {% endif %}
 
