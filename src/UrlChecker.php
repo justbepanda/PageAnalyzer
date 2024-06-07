@@ -3,6 +3,7 @@
 namespace Hexlet\Code;
 
 use PDO;
+use GuzzleHttp\Client;
 
 class UrlChecker
 {
@@ -13,11 +14,33 @@ class UrlChecker
         $this->pdo = $pdo;
     }
 
-    public function insert($url_id, $createdAt)
+    public function checkUrl($url)
     {
-        $sql = "INSERT INTO url_checks(url_id, created_at) VALUES(:url_id, :created_at)";
+        $client = new Client();
+        $res = $client->request('GET', $url);
+        $statusCode = $res->getStatusCode();
+
+        $data = [
+            'statusCode' => $statusCode
+        ];
+        return $data;
+    }
+
+    public function getStatusCode()
+    {
+//        $urlRepo = new UrlRepository($this->pdo);
+//        $url = $urlRepo->findById($url_id);
+//        $urlName = $url[0]['name'];
+//        $urlResponse = $this->check($urlName);
+//        $statusCode = $urlResponse['statusCode'];
+    }
+
+    public function insert($url_id, $statusCode, $createdAt)
+    {
+        $sql = "INSERT INTO url_checks(url_id, status_code, created_at) VALUES(:url_id, :status_code, :created_at)";
         $stmt = $this->pdo->prepare($sql);
         $stmt->bindParam(':url_id', $url_id);
+        $stmt->bindParam(':status_code', $statusCode);
         $stmt->bindParam(':created_at', $createdAt);
         $stmt->execute();
         return $this->pdo->lastInsertId();

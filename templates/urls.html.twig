@@ -26,11 +26,15 @@
                                 </a>
                             </td>
                             <td>
-                                {% if url['lastCheckCreatedAt'] is not null %}
-                                    {{ url['lastCheckCreatedAt'] }}
+                                {% if url['createdAt'] is not null %}
+                                    {{ url['createdAt'] }}
                                 {% endif %}
                             </td>
-                            <td></td>
+                            <td>
+                                {% if url['statusCode'] is not null %}
+                                    {{ url['statusCode'] }}
+                                {% endif %}
+                            </td>
                         </tr>
 
                     {% endfor %}

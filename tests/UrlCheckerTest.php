@@ -3,6 +3,7 @@
 namespace Hexlet\Code\Tests;
 
 use Hexlet\Code\UrlChecker;
+use Hexlet\Code\UrlRepository;
 use PHPUnit\Framework\TestCase;
 use Mockery;
 use PDO;
@@ -12,7 +13,8 @@ class UrlCheckerTest extends TestCase
 {
     protected $pdoMock;
     protected $pdoStmtMock;
-    protected $UrlChecker;
+    protected $urlChecker;
+    protected $urlRepo;
 
     protected function setUp(): void
     {
@@ -20,7 +22,8 @@ class UrlCheckerTest extends TestCase
 
         $this->pdoMock = Mockery::mock(PDO::class);
         $this->pdoStmtMock = Mockery::mock(PDOStatement::class);
-        $this->UrlChecker = new UrlChecker($this->pdoMock);
+        $this->urlChecker = Mockery::mock(UrlChecker::class, [$this->pdoMock])->makePartial();
+        $this->urlRepo = Mockery::mock(UrlRepository::class);
     }
 
     protected function tearDown(): void
@@ -33,14 +36,20 @@ class UrlCheckerTest extends TestCase
     {
         $urlId = '2';
         $createdAt = '2020-10-10 10:10:10';
+        $statusCode = '200';
+
 
         $this->pdoMock->shouldReceive('prepare')
             ->once()
-            ->with("INSERT INTO url_checks(url_id, created_at) VALUES(:url_id, :created_at)")
+            ->with("INSERT INTO url_checks(url_id, status_code, created_at) VALUES(:url_id, :status_code, :created_at)")
             ->andReturn($this->pdoStmtMock);
 
         $this->pdoStmtMock->shouldReceive('bindParam')
             ->with(':url_id', $urlId)
+            ->once();
+
+        $this->pdoStmtMock->shouldReceive('bindParam')
+            ->with(':status_code', $statusCode)
             ->once();
 
         $this->pdoStmtMock->shouldReceive('bindParam')
@@ -54,7 +63,7 @@ class UrlCheckerTest extends TestCase
             ->once()
             ->andReturn('100');
 
-        $result = $this->UrlChecker->insert($urlId, $createdAt);
+        $result = $this->urlChecker->insert($urlId, $statusCode, $createdAt);
 
         $this->assertEquals('100', $result);
     }
@@ -87,7 +96,7 @@ class UrlCheckerTest extends TestCase
             ->with(PDO::FETCH_ASSOC)
             ->andReturn($expected);
 
-        $result = $this->UrlChecker->all();
+        $result = $this->urlChecker->all();
 
         $this->assertEquals($expected, $result);
     }
@@ -121,7 +130,7 @@ class UrlCheckerTest extends TestCase
             ->with(PDO::FETCH_ASSOC)
             ->andReturn($expected);
 
-        $result = $this->UrlChecker->lastByUrlId($urlId);
+        $result = $this->urlChecker->lastByUrlId($urlId);
 
         $this->assertEquals($expected, $result);
     }
