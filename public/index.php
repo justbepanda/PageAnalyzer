@@ -58,7 +58,6 @@ $app->get('/', function ($request, $response) {
 })->setName('home');
 
 
-
 $app->get('/urls/{id}', function ($request, $response, $args) use ($urlRepo, $checksRepo) {
     $messages = $this->get('flash')->getMessages();
     $checks = $checksRepo->allByUrlId($args['id']);
@@ -86,8 +85,8 @@ $app->get('/urls', function ($request, $response) use ($urlRepo, $checksRepo) {
 
     $urlsPreparedForPage = Arr::map($sortedUrls, function ($value) use ($checksRepo) {
         $lastUrlCheck = $checksRepo->lastByUrlId($value['id']);
-        $createdAt = $lastUrlCheck[0]['created_at'];
-        $statusCode = $lastUrlCheck[0]['status_code'];
+        $createdAt = $lastUrlCheck[0]['created_at'] ?? '';
+        $statusCode = $lastUrlCheck[0]['status_code'] ?? '';
         $value['createdAt'] = $createdAt;
         $value['statusCode'] = $statusCode;
         return $value;
