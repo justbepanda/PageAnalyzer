@@ -2,12 +2,18 @@
 
 namespace Hexlet\Code\Tests;
 
+use GuzzleHttp\Client;
+use GuzzleHttp\Exception\ConnectException;
+use GuzzleHttp\Exception\RequestException;
 use Hexlet\Code\UrlChecker;
 use Hexlet\Code\UrlRepository;
 use PHPUnit\Framework\TestCase;
 use Mockery;
 use PDO;
 use PDOStatement;
+use Psr\Http\Message\ResponseInterface;
+use DiDom\Document;
+use DiDom\Element;
 
 class UrlCheckerTest extends TestCase
 {
@@ -36,12 +42,14 @@ class UrlCheckerTest extends TestCase
     {
         $urlId = '2';
         $createdAt = '2020-10-10 10:10:10';
+        $h1 = 'h1 test';
+        $title = 'title test';
+        $description = 'desc test';
         $statusCode = '200';
-
 
         $this->pdoMock->shouldReceive('prepare')
             ->once()
-            ->with("INSERT INTO url_checks(url_id, status_code, created_at) VALUES(:url_id, :status_code, :created_at)")
+            ->with("INSERT INTO url_checks(url_id, status_code, h1, title, description, created_at) VALUES(:url_id, :status_code, :h1, :title, :description, :created_at)")
             ->andReturn($this->pdoStmtMock);
 
         $this->pdoStmtMock->shouldReceive('bindParam')
@@ -50,6 +58,18 @@ class UrlCheckerTest extends TestCase
 
         $this->pdoStmtMock->shouldReceive('bindParam')
             ->with(':status_code', $statusCode)
+            ->once();
+
+        $this->pdoStmtMock->shouldReceive('bindParam')
+            ->with(':h1', $h1)
+            ->once();
+
+        $this->pdoStmtMock->shouldReceive('bindParam')
+            ->with(':title', $title)
+            ->once();
+
+        $this->pdoStmtMock->shouldReceive('bindParam')
+            ->with(':description', $description)
             ->once();
 
         $this->pdoStmtMock->shouldReceive('bindParam')
@@ -63,13 +83,14 @@ class UrlCheckerTest extends TestCase
             ->once()
             ->andReturn('100');
 
-        $result = $this->urlChecker->insert($urlId, $statusCode, $createdAt);
+        $result = $this->urlChecker->insert($urlId, $statusCode, $h1, $title, $description, $createdAt);
 
         $this->assertEquals('100', $result);
     }
 
-    public function testAll(): void
+    public function testAllByUrlId(): void
     {
+        $urlId = 5;
         $expected = [
             ['id' => 100,
                 'url_id' => 5,
@@ -87,16 +108,23 @@ class UrlCheckerTest extends TestCase
                 'created_at' => '2024-06-03 10:10:10'],
         ];
 
-        $this->pdoMock->shouldReceive('query')
-            ->with("SELECT * FROM url_checks")
+        $this->pdoMock->shouldReceive('prepare')
+            ->with("SELECT * FROM url_checks WHERE url_id = :url_id ORDER BY created_at")
             ->once()
             ->andReturn($this->pdoStmtMock);
+
+        $this->pdoStmtMock->shouldReceive('bindParam')
+            ->with(':url_id', $urlId)
+            ->once();
+
+        $this->pdoStmtMock->shouldReceive('execute')
+            ->once();
 
         $this->pdoStmtMock->shouldReceive('fetchAll')
             ->with(PDO::FETCH_ASSOC)
             ->andReturn($expected);
 
-        $result = $this->urlChecker->all();
+        $result = $this->urlChecker->allByUrlId($urlId);
 
         $this->assertEquals($expected, $result);
     }

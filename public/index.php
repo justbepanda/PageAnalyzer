@@ -85,10 +85,8 @@ $app->get('/urls', function ($request, $response) use ($urlRepo, $checksRepo) {
 
     $urlsPreparedForPage = Arr::map($sortedUrls, function ($value) use ($checksRepo) {
         $lastUrlCheck = $checksRepo->lastByUrlId($value['id']);
-        $createdAt = $lastUrlCheck[0]['created_at'] ?? '';
-        $statusCode = $lastUrlCheck[0]['status_code'] ?? '';
-        $value['createdAt'] = $createdAt;
-        $value['statusCode'] = $statusCode;
+        $value['createdAt'] = $lastUrlCheck[0]['created_at'];
+        $value['statusCode'] = $lastUrlCheck[0]['status_code'];
         return $value;
     });
     $data = [
@@ -141,16 +139,23 @@ $app->post('/urls/{url_id}/checks', function ($request, $response, $args) use ($
     $url_id = $args['url_id'];
 //    file_put_contents('debug.log', print_r($url_id, true), FILE_APPEND);
 
-    $name = $urlRepo->findById($url_id)[0]['name'];
-    $responseData = $checksRepo->checkUrl($name);
-    $statusCode = $responseData['statusCode'];
-    $title = $responseData['title'] ?? '';
+    $urlName = $urlRepo->findById($url_id)[0]['name'];
+    $responseData = $checksRepo->getUrlResponse($urlName);
+
+    if ($responseData['flash']['type'] === 'success') {
+        $documentData = $checksRepo->getDocumentData($urlName);
+    }
+    $title = $documentData['title'] ?? '';
     $h1 = $responseData['h1'] ?? '';
     $description = $responseData['description'] ?? '';
 
-    $checksRepo->insert($url_id, $statusCode, $h1, $title, $description, $createdAt);
+    $statusCode = $responseData['statusCode'];
 
-    $this->get('flash')->addMessage('success', 'Страница успешно проверена');
+    if ($responseData['flash']['type'] !== 'danger') {
+        $checksRepo->insert($url_id, $statusCode, $h1, $title, $description, $createdAt);
+    }
+
+    $this->get('flash')->addMessage($responseData['flash']['type'], $responseData['flash']['text']);
     $args['id'] = $args['url_id'];
     return $response->withRedirect($router->urlFor('url.show', $args));
 
