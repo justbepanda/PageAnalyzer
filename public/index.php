@@ -137,19 +137,22 @@ $app->post('/urls', function ($request, $response) use ($router, $urlRepo) {
 $app->post('/urls/{url_id}/checks', function ($request, $response, $args) use ($router, $checksRepo, $urlRepo) {
     $createdAt = Carbon::now()->toDateTimeString();
     $url_id = $args['url_id'];
-//    file_put_contents('debug.log', print_r($url_id, true), FILE_APPEND);
+
 
     $urlName = $urlRepo->findById($url_id)[0]['name'];
     $responseData = $checksRepo->getUrlResponse($urlName);
-
+    $statusCode = $responseData['statusCode'];
+    $documentData = [];
     if ($responseData['flash']['type'] === 'success') {
         $documentData = $checksRepo->getDocumentData($urlName);
     }
-    $title = $documentData['title'] ?? '';
-    $h1 = $responseData['h1'] ?? '';
-    $description = $responseData['description'] ?? '';
 
-    $statusCode = $responseData['statusCode'];
+//        file_put_contents('debug.log', print_r($documentData, true), FILE_APPEND);
+    $title = $documentData['title'] ?? '';
+    $h1 = $documentData['h1'] ?? '';
+    $description = $documentData['description'] ?? '';
+
+
 
     if ($responseData['flash']['type'] !== 'danger') {
         $checksRepo->insert($url_id, $statusCode, $h1, $title, $description, $createdAt);
