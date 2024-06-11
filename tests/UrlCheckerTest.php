@@ -2,18 +2,20 @@
 
 namespace Hexlet\Code\Tests;
 
-use GuzzleHttp\Client;
-use GuzzleHttp\Exception\ConnectException;
-use GuzzleHttp\Exception\RequestException;
+use DiDom\Document;
+use DiDom\Element;
 use Hexlet\Code\UrlChecker;
 use Hexlet\Code\UrlRepository;
 use PHPUnit\Framework\TestCase;
 use Mockery;
 use PDO;
 use PDOStatement;
-use Psr\Http\Message\ResponseInterface;
-use DiDom\Document;
-use DiDom\Element;
+use GuzzleHttp\Client;
+use GuzzleHttp\Handler\MockHandler;
+use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Psr7\Response;
+use GuzzleHttp\Psr7\Request;
+use GuzzleHttp\Exception\RequestException;
 
 class UrlCheckerTest extends TestCase
 {
@@ -21,6 +23,7 @@ class UrlCheckerTest extends TestCase
     protected $pdoStmtMock;
     protected $urlChecker;
     protected $urlRepo;
+
 
     protected function setUp(): void
     {
@@ -161,5 +164,75 @@ class UrlCheckerTest extends TestCase
         $result = $this->urlChecker->lastByUrlId($urlId);
 
         $this->assertEquals($expected, $result);
+    }
+
+
+    public function testGetUrlResponseSuccess()
+    {
+        $url = 'https://hexlet.io';
+        $mock = new MockHandler([
+            new Response(200, ['X-Foo' => 'Bar'], 'Hello, World')
+        ]);
+        $handlerStack = HandlerStack::create($mock);
+        $clientMock = new Client(['handler' => $handlerStack]);
+        $result = $this->urlChecker->getUrlResponse($url, $clientMock);
+        $this->assertEquals(200, $result['statusCode']);
+        $this->assertEquals('success', $result['flash']['type']);
+        $this->assertEquals('Страница успешно проверена', $result['flash']['text']);
+    }
+
+    public function testGetUrlResponseWarning()
+    {
+        $url = 'https://hexlet.io';
+        $mock = new MockHandler([
+            new Response(403, ['X-Foo' => 'Bar'], 'Hello, World')
+        ]);
+        $handlerStack = HandlerStack::create($mock);
+        $clientMock = new Client(['handler' => $handlerStack]);
+        $result = $this->urlChecker->getUrlResponse($url, $clientMock);
+        $this->assertEquals(403, $result['statusCode']);
+        $this->assertEquals('warning', $result['flash']['type']);
+        $this->assertEquals('Проверка была выполнена успешно, но сервер ответил с ошибкой', $result['flash']['text']);
+    }
+
+    public function testGetUrlResponseWarningException()
+    {
+        $url = 'https://hexlet.io';
+        $mock = new MockHandler([
+            new RequestException('Error Communicating with Server', new Request('GET', $url))
+        ]);
+
+        $handlerStack = HandlerStack::create($mock);
+        $clientMock = new Client(['handler' => $handlerStack]);
+        $result = $this->urlChecker->getUrlResponse($url, $clientMock);
+        $this->assertNull($result['statusCode']);
+        $this->assertEquals('warning', $result['flash']['type']);
+        $this->assertEquals('Проверка была выполнена успешно, но сервер ответил с ошибкой', $result['flash']['text']);
+    }
+
+
+
+    public function testGetDocumentData()
+    {
+        $documentMock = Mockery::mock(Document::class);
+        $titleMock = Mockery::mock('Element', ['text' => 'Example Title']);
+        $h1Mock = Mockery::mock('Element', ['text' => 'Example H1']);
+        $metaMock = Mockery::mock('Element', ['getAttribute' => 'Example Description']);
+
+        $documentMock->shouldReceive('first')
+            ->with('title')
+            ->andReturn($titleMock);
+        $documentMock->shouldReceive('first')
+            ->with('h1')
+            ->andReturn($h1Mock);
+        $documentMock->shouldReceive('first')
+            ->with('meta[name="description"]')
+            ->andReturn($metaMock);
+
+        $result = $this->urlChecker->getDocumentData('https://hexlet.io', $documentMock);
+
+        $this->assertEquals('Example Title', $result['title']);
+        $this->assertEquals('Example H1', $result['h1']);
+        $this->assertEquals('Example Description', $result['description']);
     }
 }

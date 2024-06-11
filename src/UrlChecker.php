@@ -19,7 +19,7 @@ class UrlChecker
     }
 
 
-    public function getUrlResponse(string $url): array
+    public function getUrlResponse(string $url, $client = null): array
     {
         $response = [
             'statusCode' => null,
@@ -28,7 +28,8 @@ class UrlChecker
                 'text' => ''
             ]
         ];
-        $client = new Client();
+        $client = $client ?? new Client();
+
         try {
             $res = $client->request('GET', $url);
             $response['statusCode'] = $res->getStatusCode();
@@ -54,9 +55,9 @@ class UrlChecker
         return $response;
     }
 
-    public function getDocumentData(string $url): array
+    public function getDocumentData(string $url, $document = null): array
     {
-        $document = new Document($url, true);
+        $document = $document ?? new Document($url, true);
         $title = $document->first('title');
         $h1 = $document->first('h1');
         $meta = $document->first('meta[name="description"]');
