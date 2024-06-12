@@ -10,11 +10,11 @@ console:
 	composer exec --verbose psysh
 
 lint:
-	composer exec --verbose phpcs -- --standard=phpcs.xml src tests
-	composer exec --verbose phpstan -- analyse src tests
+	composer exec --verbose phpcs -- --standard=phpcs.xml app tests
+	composer exec --verbose phpstan -- analyse app tests
 
 lint-fix:
-	composer exec --verbose phpcbf -- --standard=phpcs.xml src tests
+	composer exec --verbose phpcbf -- --standard=phpcs.xml app tests
 
 test:
 	composer exec --verbose phpunit tests

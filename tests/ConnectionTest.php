@@ -5,6 +5,7 @@ namespace Hexlet\Code\Tests;
 use Exception;
 use Hexlet\Code\Connection;
 use PHPUnit\Framework\TestCase;
+use PDO;
 
 class ConnectionTest extends TestCase
 {
@@ -16,6 +17,6 @@ class ConnectionTest extends TestCase
         $connection = Connection::get();
         $this->assertInstanceOf(Connection::class, $connection);
         $pdo = $connection->connect();
-        $this->assertInstanceOf(\PDO::class, $pdo);
+        $this->assertInstanceOf(PDO::class, $pdo);
     }
 }
