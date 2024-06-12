@@ -2,24 +2,26 @@
 
 namespace Hexlet\Code;
 
+use PDO;
+
 class UrlRepository
 {
     /**
      * Объект PDO
-     * @var \PDO
+     * @var PDO
      */
-    private $pdo;
+    private PDO $pdo;
 
     /**
      * инициализация объекта с объектом \PDO
      * @тип параметра $pdo
      */
-    public function __construct($pdo)
+    public function __construct(PDO $pdo)
     {
         $this->pdo = $pdo;
     }
 
-    public function insert($name, $created): false|string
+    public function insert(string $name, string $created): false|string
     {
         $sql = "INSERT INTO urls (name, created_at) VALUES(:name, :created)";
 
@@ -34,7 +36,7 @@ class UrlRepository
     }
 
 
-    public function findById($id): false|array
+    public function findById(int $id): false|array
     {
         $sql = "SELECT * FROM urls WHERE id = :id";
         $stmt = $this->pdo->prepare($sql);
@@ -49,7 +51,7 @@ class UrlRepository
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
 
-    public function findByName($name): false|array
+    public function findByName(string $name): false|array
     {
         $sql = "SELECT * FROM urls WHERE name = :name";
         $stmt = $this->pdo->prepare($sql);

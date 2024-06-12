@@ -215,19 +215,31 @@ class UrlCheckerTest extends TestCase
     public function testGetDocumentData()
     {
         $documentMock = Mockery::mock(Document::class);
-        $titleMock = Mockery::mock('Element', ['text' => 'Example Title']);
-        $h1Mock = Mockery::mock('Element', ['text' => 'Example H1']);
-        $metaMock = Mockery::mock('Element', ['getAttribute' => 'Example Description']);
+        $titleElementMock = Mockery::mock(Element::class);
+        $h1ElementMock = Mockery::mock(Element::class);
+        $metaElementMock = Mockery::mock(Element::class);
 
         $documentMock->shouldReceive('first')
             ->with('title')
-            ->andReturn($titleMock);
+            ->andReturn($titleElementMock);
+
         $documentMock->shouldReceive('first')
             ->with('h1')
-            ->andReturn($h1Mock);
+            ->andReturn($h1ElementMock);
+
         $documentMock->shouldReceive('first')
-            ->with('meta[name="description"]')
-            ->andReturn($metaMock);
+            ->with('meta[name=description]')
+            ->andReturn($metaElementMock);
+
+        $titleElementMock->shouldReceive('text')
+            ->andReturn('Example Title');
+
+        $h1ElementMock->shouldReceive('text')
+            ->andReturn('Example H1');
+
+        $metaElementMock->shouldReceive('getAttribute')
+            ->with('content')
+            ->andReturn('Example Description');
 
         $result = $this->urlChecker->getDocumentData('https://hexlet.io', $documentMock);
 

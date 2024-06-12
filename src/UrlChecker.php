@@ -3,11 +3,13 @@
 namespace Hexlet\Code;
 
 use GuzzleHttp\Exception\ConnectException;
-use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Exception\RequestException;
 use PDO;
 use GuzzleHttp\Client;
 use DiDom\Document;
+use Illuminate\Support;
+use DiDom\Exceptions\InvalidSelectorException;
+use Psr\Http\Message\ResponseInterface;
 
 class UrlChecker
 {
@@ -28,15 +30,18 @@ class UrlChecker
                 'text' => ''
             ]
         ];
+
         $client = $client ?? new Client();
 
         try {
             $res = $client->request('GET', $url);
-            $response['statusCode'] = $res->getStatusCode();
-            $response['flash']['type'] = 'success';
-            $response['flash']['text'] = 'Страница успешно проверена';
+            if ($res instanceof ResponseInterface) {
+                $response['statusCode'] = $res->getStatusCode();
+                $response['flash']['type'] = 'success';
+                $response['flash']['text'] = 'Страница успешно проверена';
+            }
         } catch (RequestException $e) {
-            if ($e->hasResponse()) {
+            if ($e->hasResponse() && $e->getResponse() instanceof ResponseInterface) {
                 $response['statusCode'] = $e->getResponse()->getStatusCode();
             }
             $response['flash']['type'] = 'warning';
@@ -55,23 +60,42 @@ class UrlChecker
         return $response;
     }
 
+    /**
+     * Получить данные документа по URL
+     *
+     * @param string $url
+     * @param Document|null $document
+     * @return array
+     * @throws InvalidSelectorException
+     */
     public function getDocumentData(string $url, ?Document $document = null): array
     {
         $document = $document ?? new Document($url, true);
-        $title = $document->first('title');
-        $h1 = $document->first('h1');
-        $meta = $document->first('meta[name="description"]');
+        $title = optional($document->first('title'))->text();
+        $h1 = optional($document->first('h1'))->text();
+        $description = optional($document->first('meta[name=description]'))->getAttribute('content');
 
         $data = [
-            'title' => $title ? $title->text() : null,
-            'h1' => $h1 ? $h1->text() : null,
-            'description' => $meta ? $meta->getAttribute('content') : null,
+            'title' => $title,
+            'h1' => $h1,
+            'description' =>  $description,
         ];
 
         return $data;
     }
 
-    public function insert($urlId, $statusCode, $h1, $title, $description, $createdAt)
+    /**
+     * Вставка данных в таблицу url_checks
+     *
+     * @param int $urlId
+     * @param int|null $statusCode
+     * @param string|null $h1
+     * @param string|null $title
+     * @param string|null $description
+     * @param string $createdAt
+     * @return int
+     */
+    public function insert(int $urlId, ?int $statusCode, ?string $h1, ?string $title, ?string $description, string $createdAt): int
     {
         $sql = "INSERT INTO url_checks(url_id, status_code, h1, title, description, created_at) VALUES(:url_id, :status_code, :h1, :title, :description, :created_at)";
         $stmt = $this->pdo->prepare($sql);
@@ -85,7 +109,13 @@ class UrlChecker
         return $this->pdo->lastInsertId();
     }
 
-    public function allByUrlId($urlId)
+    /**
+     * Получение всех записей по URL ID
+     *
+     * @param int $urlId
+     * @return array
+     */
+    public function allByUrlId(int $urlId): array
     {
         $sql = "SELECT * FROM url_checks WHERE url_id = :url_id ORDER BY created_at";
         $stmt = $this->pdo->prepare($sql);
@@ -94,7 +124,13 @@ class UrlChecker
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function lastByUrlId($urlId)
+    /**
+     * Получение последней записи по URL ID
+     *
+     * @param int $urlId
+     * @return array
+     */
+    public function lastByUrlId(int $urlId): array
     {
         $sql = "SELECT * FROM url_checks WHERE url_id = :url_id ORDER BY created_at DESC LIMIT 1";
         $stmt = $this->pdo->prepare($sql);

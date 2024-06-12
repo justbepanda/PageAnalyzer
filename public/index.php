@@ -127,7 +127,7 @@ $app->post('/urls', function ($request, $response) use ($router, $urlRepo) {
 
         return $this->get('view')->render($response->withStatus(422), 'index.html.twig', $params);
     }
-    $val = new UrlValidator();
+
     $normalizedUrl = $urlRepo->normalize($url);
 
     // if url exits, redirect to existing id
