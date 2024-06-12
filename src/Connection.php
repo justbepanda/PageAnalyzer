@@ -2,6 +2,10 @@
 
 namespace Hexlet\Code;
 
+use Dotenv\Dotenv;
+use PDO;
+use Exception;
+
 /**
  * Создание класса Connection
  */
@@ -15,12 +19,12 @@ class Connection
 
     /**
      * Подключение к базе данных и возврат экземпляра объекта \PDO
-     * @return \PDO
-     * @throws \Exception
+     * @return PDO
+     * @throws Exception
      */
-    public function connect(): \PDO
+    public function connect(): PDO
     {
-        $dotenv = \Dotenv\Dotenv::createImmutable(__DIR__ . '/../');
+        $dotenv = Dotenv::createImmutable(__DIR__ . '/../');
         $dotenv->load();
         $databaseUrl = getenv('DATABASE_URL') ? getenv('DATABASE_URL') : $_ENV['DATABASE_URL'];
         $urlParts = parse_url($databaseUrl);
@@ -29,7 +33,6 @@ class Connection
         $host = $urlParts['host'];
         $port = $urlParts['port'] ?? null;
         $dbName = ltrim($urlParts['path'], '/');
-
 
         $conStr = sprintf(
             "pgsql:host=%s;port=%d;dbname=%s;user=%s;password=%s",
@@ -40,9 +43,9 @@ class Connection
             $password
         );
 
-        $pdo = new \PDO($conStr);
+        $pdo = new PDO($conStr);
 
-        $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
         return $pdo;
     }
@@ -51,13 +54,26 @@ class Connection
      * возврат экземпляра объекта Connection
      * тип @return
      */
+    /**
+     * Возврат экземпляра объекта Connection
+     * @return Connection|null
+     */
     public static function get(): ?Connection
     {
-        if (null === static::$conn) {
-            static::$conn = new self();
+        if (null === self::$conn) {
+            self::$conn = new self();
         }
 
-        return static::$conn;
+        return self::$conn;
+    }
+
+    /**
+     * Возвращает текущее подключение к базе данных
+     * @return Connection|null
+     */
+    public static function getConnection(): ?Connection
+    {
+        return self::$conn;
     }
 
     protected function __construct()

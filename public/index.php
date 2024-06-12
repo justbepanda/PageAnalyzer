@@ -89,8 +89,8 @@ $app->get('/urls', function ($request, $response) use ($urlRepo, $checksRepo) {
 
     $urlsPreparedForPage = Arr::map($sortedUrls, function ($value) use ($checksRepo) {
         $lastUrlCheck = $checksRepo->lastByUrlId($value['id']);
-        $value['createdAt'] = $lastUrlCheck[0]['created_at'];
-        $value['statusCode'] = $lastUrlCheck[0]['status_code'];
+        $value['createdAt'] = $lastUrlCheck[0]['created_at'] ?? null;
+        $value['statusCode'] = $lastUrlCheck[0]['status_code'] ?? null;
         return $value;
     });
     $data = [

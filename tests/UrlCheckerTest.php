@@ -19,10 +19,14 @@ use GuzzleHttp\Exception\RequestException;
 
 class UrlCheckerTest extends TestCase
 {
-    protected $pdoMock;
-    protected $pdoStmtMock;
-    protected $urlChecker;
-    protected $urlRepo;
+    protected mixed $pdoMock;
+    protected mixed $pdoStmtMock;
+    protected mixed $urlChecker;
+    protected mixed $urlRepo;
+    protected mixed $h1ElementMock;
+    protected mixed $documentMock;
+    protected mixed $titleElementMock;
+    protected mixed $metaElementMock;
 
 
     protected function setUp(): void
@@ -33,11 +37,16 @@ class UrlCheckerTest extends TestCase
         $this->pdoStmtMock = Mockery::mock(PDOStatement::class);
         $this->urlChecker = Mockery::mock(UrlChecker::class, [$this->pdoMock])->makePartial();
         $this->urlRepo = Mockery::mock(UrlRepository::class);
+        $this->documentMock = Mockery::mock(Document::class);
+        $this->titleElementMock = Mockery::mock(Element::class);
+        $this->h1ElementMock = Mockery::mock(Element::class);
+        $this->metaElementMock = Mockery::mock(Element::class);
     }
 
     protected function tearDown(): void
     {
         parent::tearDown();
+
         Mockery::close();
     }
 
@@ -214,34 +223,30 @@ class UrlCheckerTest extends TestCase
 
     public function testGetDocumentData()
     {
-        $documentMock = Mockery::mock(Document::class);
-        $titleElementMock = Mockery::mock(Element::class);
-        $h1ElementMock = Mockery::mock(Element::class);
-        $metaElementMock = Mockery::mock(Element::class);
 
-        $documentMock->shouldReceive('first')
+        $this->documentMock->shouldReceive('first')
             ->with('title')
-            ->andReturn($titleElementMock);
+            ->andReturn($this->titleElementMock);
 
-        $documentMock->shouldReceive('first')
+        $this->documentMock->shouldReceive('first')
             ->with('h1')
-            ->andReturn($h1ElementMock);
+            ->andReturn($this->h1ElementMock);
 
-        $documentMock->shouldReceive('first')
+        $this->documentMock->shouldReceive('first')
             ->with('meta[name=description]')
-            ->andReturn($metaElementMock);
+            ->andReturn($this->metaElementMock);
 
-        $titleElementMock->shouldReceive('text')
+        $this->titleElementMock->shouldReceive('text')
             ->andReturn('Example Title');
 
-        $h1ElementMock->shouldReceive('text')
+        $this->h1ElementMock->shouldReceive('text')
             ->andReturn('Example H1');
 
-        $metaElementMock->shouldReceive('getAttribute')
+        $this->metaElementMock->shouldReceive('getAttribute')
             ->with('content')
             ->andReturn('Example Description');
 
-        $result = $this->urlChecker->getDocumentData('https://hexlet.io', $documentMock);
+        $result = $this->urlChecker->getDocumentData('https://hexlet.io', $this->documentMock);
 
         $this->assertEquals('Example Title', $result['title']);
         $this->assertEquals('Example H1', $result['h1']);

@@ -10,9 +10,11 @@ use PDOStatement;
 
 class UrlRepositoryTest extends TestCase
 {
-    protected $pdoMock;
-    protected $pdoStmtMock;
-    protected $UrlRepository;
+    protected mixed $pdoMock;
+
+    protected mixed $pdoStmtMock;
+
+    protected mixed $UrlRepository;
 
     protected function setUp(): void
     {
@@ -27,7 +29,6 @@ class UrlRepositoryTest extends TestCase
     {
         parent::tearDown();
 
-        // Убеждаемся, что все ожидаемые вызовы были выполнены
         Mockery::close();
     }
 

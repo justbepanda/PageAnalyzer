@@ -13,10 +13,10 @@ class UrlRepository
     private PDO $pdo;
 
     /**
-     * инициализация объекта с объектом \PDO
+     * инициализация объекта с объектом PDO
      * @тип параметра $pdo
      */
-    public function __construct(PDO $pdo)
+    public function __construct(mixed $pdo)
     {
         $this->pdo = $pdo;
     }
