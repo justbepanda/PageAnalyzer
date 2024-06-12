@@ -121,10 +121,10 @@ $app->post('/urls', function ($request, $response) use ($router, $urlRepo) {
     if (!$validator->validate()) {
         // Errors
         $params = [
-            'errors' => $validator->errors()['website'],
+            'errors' => $validator->errors()['URL'],
             'url' => $url
         ];
-        dump($validator->errors());
+//        dump($validator->errors());
 
         return $this->get('view')->render($response->withStatus(422), 'index.html.twig', $params);
     }
@@ -140,20 +140,11 @@ $app->post('/urls', function ($request, $response) use ($router, $urlRepo) {
         return $response->withRedirect($router->urlFor('url.show', $args));
     }
 
-
-
-
-
     $created = Carbon::now()->toDateTimeString();
     $redirectId = $urlRepo->insert($normalizedUrl, $created);
     $args['id'] = $redirectId;
     $this->get('flash')->addMessage('success', 'Страница успешно добавлена');
     return $response->withRedirect($router->urlFor('url.show', $args));
-
-
-
-
-
 })->setName('url.add');
 
 $app->post('/urls/{url_id}/checks', function ($request, $response, $args) use ($router, $checksRepo, $urlRepo) {
