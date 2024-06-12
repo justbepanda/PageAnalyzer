@@ -11,6 +11,10 @@ use Slim\Views\Twig;
 use Slim\Views\TwigMiddleware;
 use Slim\Flash\Messages;
 use Carbon\Carbon;
+use Valitron\Validator;
+
+Validator::langDir(__DIR__ . '/../validator_lang'); // always set langDir before lang.
+Validator::lang('ru');
 
 session_start();
 
@@ -99,9 +103,33 @@ $app->get('/urls', function ($request, $response) use ($urlRepo, $checksRepo) {
 $app->post('/urls', function ($request, $response) use ($router, $urlRepo) {
     $data = $request->getParsedBody();
     $url = $data['url']['name'];
+    $validator = new Validator(['URL' => $url]);
+    $validator->setPrependLabels(false);
 
-    $validator = new UrlValidator();
-    $normalizedUrl = $validator->normalize($url);
+    $validator->rules([
+        'required' => [
+            ['URL']
+        ],
+        'url' => [
+            ['URL']
+        ],
+        'lengthMax' => [
+            ['URL', 255]
+        ],
+    ]);
+//    $validator->validate();
+    if (!$validator->validate()) {
+        // Errors
+        $params = [
+            'errors' => $validator->errors()['website'],
+            'url' => $url
+        ];
+        dump($validator->errors());
+
+        return $this->get('view')->render($response->withStatus(422), 'index.html.twig', $params);
+    }
+    $val = new UrlValidator();
+    $normalizedUrl = $val->normalize($url);
 
     // if url exits, redirect to existing id
     $existingUrl = $urlRepo->findByName($normalizedUrl);
@@ -112,25 +140,19 @@ $app->post('/urls', function ($request, $response) use ($router, $urlRepo) {
         return $response->withRedirect($router->urlFor('url.show', $args));
     }
 
-    $errors = $validator->validate($url);
-
-    // if no error, add new url
-    if (empty($errors)) {
-        $created = Carbon::now()->toDateTimeString();
-        $redirectId = $urlRepo->insert($url, $created);
-        $args['id'] = $redirectId;
-        $this->get('flash')->addMessage('success', 'Страница успешно добавлена');
-        return $response->withRedirect($router->urlFor('url.show', $args));
-    }
 
 
-    // if errors, show them
-    $params = [
-        'errors' => $errors,
-        'url' => $url
-    ];
 
-    return $this->get('view')->render($response->withStatus(422), 'index.html.twig', $params);
+
+    $created = Carbon::now()->toDateTimeString();
+    $redirectId = $urlRepo->insert($normalizedUrl, $created);
+    $args['id'] = $redirectId;
+    $this->get('flash')->addMessage('success', 'Страница успешно добавлена');
+    return $response->withRedirect($router->urlFor('url.show', $args));
+
+
+
+
 
 })->setName('url.add');
 
@@ -151,8 +173,6 @@ $app->post('/urls/{url_id}/checks', function ($request, $response, $args) use ($
     $title = $documentData['title'] ?? '';
     $h1 = $documentData['h1'] ?? '';
     $description = $documentData['description'] ?? '';
-
-
 
     if ($responseData['flash']['type'] !== 'danger') {
         $checksRepo->insert($url_id, $statusCode, $h1, $title, $description, $createdAt);
