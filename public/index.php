@@ -117,19 +117,18 @@ $app->post('/urls', function ($request, $response) use ($router, $urlRepo) {
             ['URL', 255]
         ],
     ]);
-//    $validator->validate();
+
     if (!$validator->validate()) {
         // Errors
         $params = [
             'errors' => $validator->errors()['URL'],
             'url' => $url
         ];
-//        dump($validator->errors());
 
         return $this->get('view')->render($response->withStatus(422), 'index.html.twig', $params);
     }
     $val = new UrlValidator();
-    $normalizedUrl = $val->normalize($url);
+    $normalizedUrl = $urlRepo->normalize($url);
 
     // if url exits, redirect to existing id
     $existingUrl = $urlRepo->findByName($normalizedUrl);

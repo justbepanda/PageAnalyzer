@@ -11,15 +11,15 @@ use DiDom\Document;
 
 class UrlChecker
 {
-    private $pdo;
+    private PDO $pdo;
 
-    public function __construct($pdo)
+    public function __construct(PDO $pdo)
     {
         $this->pdo = $pdo;
     }
 
 
-    public function getUrlResponse(string $url, $client = null): array
+    public function getUrlResponse(string $url, ?Client $client = null): array
     {
         $response = [
             'statusCode' => null,
@@ -55,7 +55,7 @@ class UrlChecker
         return $response;
     }
 
-    public function getDocumentData(string $url, $document = null): array
+    public function getDocumentData(string $url, ?Document $document = null): array
     {
         $document = $document ?? new Document($url, true);
         $title = $document->first('title');

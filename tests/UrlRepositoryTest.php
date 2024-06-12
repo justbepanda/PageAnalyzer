@@ -140,4 +140,22 @@ class UrlRepositoryTest extends TestCase
 
         $this->assertEquals($expected, $result);
     }
+    public function testNormalize()
+    {
+        $received = "https://hexlet.io/asdsd";
+        $expected = "https://hexlet.io";
+
+        $result = $this->UrlRepository->normalize($received);
+
+        $this->assertEquals($expected, $result);
+    }
+
+    public function testNormalizeFalse()
+    {
+        $received = "hexlet.io";
+
+        $result = $this->UrlRepository->normalize($received);
+
+        $this->assertFalse($result);
+    }
 }

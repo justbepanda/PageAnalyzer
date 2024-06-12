@@ -57,4 +57,14 @@ class UrlRepository
         $stmt->execute();
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
+
+    public function normalize(string $url): string|false
+    {
+        $parsedUrl = parse_url($url);
+        if ($parsedUrl === false || !isset($parsedUrl['scheme']) || !isset($parsedUrl['host'])) {
+            return false;
+        }
+        $normalizedUrl = $parsedUrl['scheme'] . '://' . $parsedUrl['host'];
+        return $normalizedUrl;
+    }
 }
