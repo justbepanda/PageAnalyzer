@@ -24,8 +24,11 @@ class Connection
      */
     public function connect(): PDO
     {
-        $dotenv = Dotenv::createImmutable(__DIR__ . '/../');
-        $dotenv?->load();
+        $dotenvPath = __DIR__ . '/../.env';
+        if (file_exists($dotenvPath)) {
+            $dotenv = Dotenv::createImmutable(__DIR__ . '/../');
+            $dotenv->load();
+        }
 
         $databaseUrl = getenv('DATABASE_URL') ? getenv('DATABASE_URL') : $_ENV['DATABASE_URL'];
         $urlParts = parse_url($databaseUrl);
