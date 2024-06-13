@@ -6,19 +6,8 @@ parameters:
   checkMissingIterableValueType: false
 
   excludePaths:
-    - */vendor/*
     - vendor/*
-    - routes/console.php
-    - routes/channels.php
-    - app/Http/Middleware/Authenticate.php
-    - app/Http/Middleware/RedirectIfAuthenticated.php
-    - app/Exceptions/Handler.php
-    - app/Providers/RouteServiceProvider.php
-    - app/Models/User.php
-    - app/Http/Middleware/TrustProxies.php
-    - storage
     - database
-    - server.php
 
   reportUnmatchedIgnoredErrors: false
   reportMaybesInPropertyPhpDocTypes: false
