@@ -34,7 +34,7 @@ jobs:
         
       - name: Set up database
         env:
-          DATABASE_URL: postgresql://mof:postgres@localhost:5432/test
+          DATABASE_URL: postgresql://mof:postgres@localhost:5432/project9_dev
         run: psql -d $DATABASE_URL -f database.sql
 
       - name: Run lint
@@ -42,7 +42,7 @@ jobs:
         
       - name: Run tests
         env:
-          DATABASE_URL: postgresql://mof:postgres@localhost:5432/test
+          DATABASE_URL: postgresql://mof:postgres@localhost:5432/project9_dev
         run: make test
         
       - name: Test & publish code coverage
