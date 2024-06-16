@@ -31,8 +31,6 @@ class Connection
         }
 
         $databaseUrl = getenv('DATABASE_URL') ? getenv('DATABASE_URL') : $_ENV['DATABASE_URL'];
-        dump($databaseUrl);
-        dump($_ENV['DATABASE_URL']);
         $urlParts = parse_url($databaseUrl);
         $username = $urlParts['user'];
         $password = $urlParts['pass'];
