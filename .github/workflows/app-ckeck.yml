@@ -7,20 +7,6 @@ jobs:
     env:
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
-    services:
-      postgres:
-        image: postgres:latest
-        ports:
-          - 5432:5432
-        env:
-          POSTGRES_DB: project9_dev
-          POSTGRES_USER: mof
-          POSTGRES_PASSWORD: postgres
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@master
@@ -32,9 +18,6 @@ jobs:
           extensions: pdo, pdo_pgsql, xdebug
       - name: Install dependencies
         run: make install
-
-      - name: Wait for PostgreSQL
-        run: until pg_isready -h localhost -p 5432; do echo "Waiting for PostgreSQL..."; sleep 2; done
         
       - name: Set up database
         run: psql -d $DATABASE_URL -f database.sql
