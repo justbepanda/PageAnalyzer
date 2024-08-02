@@ -3,7 +3,6 @@
 namespace Hexlet\Code;
 
 use GuzzleHttp\Exception\ConnectException;
-use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Exception\RequestException;
 use PDO;
 use GuzzleHttp\Client;
@@ -20,10 +19,7 @@ class UrlChecker
         $this->pdo = $pdo;
     }
 
-    /**
-     * @return array{statusCode: ?int, flash: array{type: string, text: string}}
-     * @throws GuzzleException
-     */
+
     public function getUrlResponse(string $url, ?Client $client = null): array
     {
         $response = [
@@ -68,7 +64,7 @@ class UrlChecker
      *
      * @param string $url
      * @param Document|null $document
-     * @return array{title: ?string, h1: ?string, description: ?string}
+     * @return array
      * @throws InvalidSelectorException
      */
     public function getDocumentData(string $url, ?Document $document = null): array
@@ -116,7 +112,7 @@ class UrlChecker
      * Получение всех записей по URL ID
      *
      * @param int $urlId
-     * @return array<array-key, mixed>
+     * @return array
      */
     public function allByUrlId(int $urlId): array
     {
@@ -131,7 +127,7 @@ class UrlChecker
      * Получение последней записи по URL ID
      *
      * @param int $urlId
-     * @return array<array-key, mixed>
+     * @return array
      */
     public function lastByUrlId(int $urlId): array
     {

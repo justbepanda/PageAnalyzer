@@ -14,7 +14,7 @@ class UrlRepository
 
     /**
      * инициализация объекта с объектом PDO
-     * @param mixed $pdo
+     * @тип параметра $pdo
      */
     public function __construct(mixed $pdo)
     {
@@ -35,9 +35,7 @@ class UrlRepository
         return $this->pdo->lastInsertId();
     }
 
-    /**
-     * @return array<string, mixed>|false
-     */
+
     public function findById(int $id): false|array
     {
         $sql = "SELECT * FROM urls WHERE id = :id";
@@ -47,18 +45,12 @@ class UrlRepository
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
 
-    /**
-     * @return array<array<string, mixed>>|false
-     */
     public function all(): false|array
     {
         $stmt = $this->pdo->query("SELECT * FROM urls");
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
 
-    /**
-     * @return array<array<string, mixed>>|false
-     */
     public function findByName(string $name): false|array
     {
         $sql = "SELECT * FROM urls WHERE name = :name";
