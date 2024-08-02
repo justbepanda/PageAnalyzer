@@ -7,7 +7,7 @@ use GuzzleHttp\Exception\RequestException;
 use PDO;
 use GuzzleHttp\Client;
 use DiDom\Document;
-use Illuminate\Support\Arr;
+use Illuminate\Support\Optional;
 use DiDom\Exceptions\InvalidSelectorException;
 use Psr\Http\Message\ResponseInterface;
 
