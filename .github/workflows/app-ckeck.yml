@@ -19,9 +19,6 @@ jobs:
       - name: Install dependencies
         run: make install
         
-      - name: Set up database
-        run: psql -d $DATABASE_URL -f database.sql
-
       - name: Run lint
         run: make lint
         
