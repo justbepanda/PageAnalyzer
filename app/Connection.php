@@ -9,7 +9,7 @@ use Exception;
 /**
  * Создание класса Connection
  */
-class Connection
+class Connection extends \PDO
 {
     /**
      * Connection
