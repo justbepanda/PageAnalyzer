@@ -7,7 +7,6 @@ use GuzzleHttp\Exception\RequestException;
 use PDO;
 use GuzzleHttp\Client;
 use DiDom\Document;
-use Illuminate\Support\Optional;
 use DiDom\Exceptions\InvalidSelectorException;
 use Psr\Http\Message\ResponseInterface;
 
@@ -71,9 +70,9 @@ class UrlChecker
     public function getDocumentData(string $url, ?Document $document = null): array
     {
         $document = $document ?? new Document($url, true);
-        $title = optional($document->first('title'))->text();
-        $h1 = optional($document->first('h1'))->text();
-        $description = optional($document->first('meta[name=description]'))->getAttribute('content');
+        $title = Optional($document->first('title'))->text();
+        $h1 = Optional($document->first('h1'))->text();
+        $description = Optional($document->first('meta[name=description]'))->getAttribute('content');
 
         $data = [
             'title' => $title,
