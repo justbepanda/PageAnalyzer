@@ -18,12 +18,15 @@ Validator::lang('ru');
 
 session_start();
 
+$urlRepo = null;
+$checksRepo = null;
+
 try {
     $pdo = Connection::get()->connect();
     $urlRepo = new UrlRepository($pdo);
     $checksRepo = new UrlChecker($pdo);
 
-} catch (\PDOException $e) {
+} catch (\PDOException|\Exception $e) {
     echo $e->getMessage();
 }
 
@@ -120,10 +123,14 @@ $app->post('/urls', function ($request, $response) use ($router, $urlRepo) {
 
     if (!$validator->validate()) {
         // Errors
-        $params = [
-            'errors' => $validator->errors()['URL'],
-            'url' => $url
-        ];
+        $errors = $validator->errors();
+        $params = [];
+        if ($errors && isset($errors['URL'])) {
+            $params = [
+                'errors' => $errors['URL'],
+                'url' => $url
+            ];
+        }
 
         return $this->get('view')->render($response->withStatus(422), 'index.html.twig', $params);
     }
