@@ -22,9 +22,11 @@ $urlRepo = null;
 $checksRepo = null;
 
 try {
-    $pdo = Connection::get()->connect();
-    $urlRepo = new UrlRepository($pdo);
-    $checksRepo = new UrlChecker($pdo);
+    $pdo = new Connection();
+    if ($pdo) {
+        $urlRepo = new UrlRepository($pdo);
+        $checksRepo = new UrlChecker($pdo);
+    }
 
 } catch (\PDOException|\Exception $e) {
     echo $e->getMessage();
@@ -67,20 +69,27 @@ $app->get('/', function ($request, $response) {
 
 $app->get('/urls/{id}', function ($request, $response, $args) use ($urlRepo, $checksRepo) {
     $messages = $this->get('flash')->getMessages();
-    $checks = $checksRepo->allByUrlId($args['id']);
-    if ($checks) {
-        $sortedChecks = Arr::sortDesc($checks, function ($value) {
-            return $value['created_at'];
-        });
-    } else {
-        $sortedChecks = null;
+
+    $urlData = '';
+    $sortedChecks = [];
+    if($checksRepo && $urlRepo) {
+        $checks = $checksRepo->allByUrlId($args['id']);
+        if ($checks) {
+            $sortedChecks = Arr::sortDesc($checks, function ($value) {
+                return $value['created_at'];
+            });
+        } else {
+            $sortedChecks = null;
+        }
+        $urlData = $urlRepo->findById($args['id'])[0];
     }
     $params = [
-        'urlData' => $urlRepo->findById($args['id'])[0],
+        'urlData' => $urlData,
         'errors' => [],
         'flash' => $messages ?? [],
         'checks' => $sortedChecks
     ];
+
     return $this->get('view')->render($response, 'url.html.twig', $params);
 })->setName('url.show');
 

@@ -5,25 +5,18 @@ namespace Hexlet\Code;
 use Dotenv\Dotenv;
 use PDO;
 use Exception;
+use PDOException;
 
 /**
  * Создание класса Connection
  */
 class Connection
 {
-    /**
-     * Connection
-     * тип @var
-     */
-    private static ?Connection $conn = null;
+    private $conn;
 
-    /**
-     * Подключение к базе данных и возврат экземпляра объекта \PDO
-     * @return PDO
-     * @throws Exception
-     */
-    public function connect(): PDO
+    public function __construct()
     {
+        $this->conn = null;
         $dotenvPath = __DIR__ . '/../.env';
         if (file_exists($dotenvPath)) {
             $dotenv = Dotenv::createImmutable(__DIR__ . '/../');
@@ -47,40 +40,12 @@ class Connection
             $password
         );
 
-        $pdo = new PDO($conStr);
-
-        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
-        return $pdo;
-    }
-
-    /**
-     * возврат экземпляра объекта Connection
-     * тип @return
-     */
-    /**
-     * Возврат экземпляра объекта Connection
-     * @return Connection|null
-     */
-    public static function get(): ?Connection
-    {
-        if (null === self::$conn) {
-            self::$conn = new self();
+        try {
+            $pdo = new PDO($conStr);
+            $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        } catch (PDOException $e) {
+            echo 'Connection Error: ' . $e->getMessage();
         }
-
-        return self::$conn;
-    }
-
-    /**
-     * Возвращает текущее подключение к базе данных
-     * @return Connection|null
-     */
-    public static function getConnection(): ?Connection
-    {
-        return self::$conn;
-    }
-
-    protected function __construct()
-    {
+        return $this->conn;
     }
 }

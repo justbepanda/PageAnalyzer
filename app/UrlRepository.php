@@ -10,7 +10,7 @@ class UrlRepository
      * Объект PDO
      * @var PDO
      */
-    private PDO $pdo;
+    private $pdo;
 
     /**
      * инициализация объекта с объектом PDO
