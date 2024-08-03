@@ -6,11 +6,7 @@ use PDO;
 
 class UrlRepository
 {
-    /**
-     * Объект PDO
-     * @var PDO
-     */
-    private $pdo;
+    private mixed $pdo;
 
     /**
      * инициализация объекта с объектом PDO

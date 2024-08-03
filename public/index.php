@@ -18,19 +18,11 @@ Validator::lang('ru');
 
 session_start();
 
-$urlRepo = null;
-$checksRepo = null;
 
-try {
-    $pdo = new Connection();
-    if ($pdo) {
-        $urlRepo = new UrlRepository($pdo);
-        $checksRepo = new UrlChecker($pdo);
-    }
-
-} catch (\PDOException|\Exception $e) {
-    echo $e->getMessage();
-}
+$pdo = new Connection();
+$connection = $pdo->connect();
+$urlRepo = new UrlRepository($connection);
+$checksRepo = new UrlChecker($connection);
 
 // Create Container
 $container = new Container();
@@ -70,21 +62,22 @@ $app->get('/', function ($request, $response) {
 $app->get('/urls/{id}', function ($request, $response, $args) use ($urlRepo, $checksRepo) {
     $messages = $this->get('flash')->getMessages();
 
-    $urlData = '';
-    $sortedChecks = [];
-    if($checksRepo && $urlRepo) {
-        $checks = $checksRepo->allByUrlId($args['id']);
-        if ($checks) {
-            $sortedChecks = Arr::sortDesc($checks, function ($value) {
-                return $value['created_at'];
-            });
-        } else {
-            $sortedChecks = null;
-        }
+
+    $checks = $checksRepo->allByUrlId($args['id']);
+    if ($checks) {
+        $sortedChecks = Arr::sortDesc($checks, function ($value) {
+            return $value['created_at'];
+        });
+    } else {
+        $sortedChecks = null;
+    }
+
+    if (isset($urlRepo->findById($args['id'])[0])) {
         $urlData = $urlRepo->findById($args['id'])[0];
     }
+
     $params = [
-        'urlData' => $urlData,
+        'urlData' => $urlData ?? null,
         'errors' => [],
         'flash' => $messages ?? [],
         'checks' => $sortedChecks
@@ -95,18 +88,19 @@ $app->get('/urls/{id}', function ($request, $response, $args) use ($urlRepo, $ch
 
 $app->get('/urls', function ($request, $response) use ($urlRepo, $checksRepo) {
     $urls = $urlRepo->all();
-    $sortedUrls = Arr::sortDesc($urls, function ($value) {
-        return $value['created_at'];
-    });
-
-    $urlsPreparedForPage = Arr::map($sortedUrls, function ($value) use ($checksRepo) {
-        $lastUrlCheck = $checksRepo->lastByUrlId($value['id']);
-        $value['createdAt'] = $lastUrlCheck[0]['created_at'] ?? null;
-        $value['statusCode'] = $lastUrlCheck[0]['status_code'] ?? null;
-        return $value;
-    });
+    if($urls) {
+        $sortedUrls = Arr::sortDesc($urls, function ($value) {
+            return $value['created_at'];
+        });
+        $urlsPreparedForPage = Arr::map($sortedUrls, function ($value) use ($checksRepo) {
+            $lastUrlCheck = $checksRepo->lastByUrlId($value['id']);
+            $value['createdAt'] = $lastUrlCheck[0]['created_at'] ?? null;
+            $value['statusCode'] = $lastUrlCheck[0]['status_code'] ?? null;
+            return $value;
+        });
+    }
     $data = [
-        'urls' => $urlsPreparedForPage
+        'urls' => $urlsPreparedForPage ?? null
     ];
 
     return $this->get('view')->render($response, 'urls.html.twig', $data);
@@ -146,8 +140,12 @@ $app->post('/urls', function ($request, $response) use ($router, $urlRepo) {
 
     $normalizedUrl = $urlRepo->normalize($url);
 
+    $existingUrl = null;
     // if url exits, redirect to existing id
-    $existingUrl = $urlRepo->findByName($normalizedUrl);
+    if($normalizedUrl) {
+        $existingUrl = $urlRepo->findByName($normalizedUrl);
+    }
+
     if ($existingUrl) {
         $redirectId = $existingUrl[0]['id'];
         $args['id'] = $redirectId;
@@ -155,36 +153,50 @@ $app->post('/urls', function ($request, $response) use ($router, $urlRepo) {
         return $response->withRedirect($router->urlFor('url.show', $args));
     }
 
-    $created = Carbon::now()->toDateTimeString();
-    $redirectId = $urlRepo->insert($normalizedUrl, $created);
-    $args['id'] = $redirectId;
-    $this->get('flash')->addMessage('success', 'Страница успешно добавлена');
-    return $response->withRedirect($router->urlFor('url.show', $args));
+    if($normalizedUrl) {
+        $created = Carbon::now()->toDateTimeString();
+        $redirectId = $urlRepo->insert($normalizedUrl, $created);
+        if($redirectId) {
+            $args['id'] = $redirectId;
+        } else {
+            $args['id'] = '1';
+        }
+
+        $this->get('flash')->addMessage('success', 'Страница успешно добавлена');
+        return $response->withRedirect($router->urlFor('url.show', $args));
+    }
+
+
 })->setName('url.add');
 
 $app->post('/urls/{url_id}/checks', function ($request, $response, $args) use ($router, $checksRepo, $urlRepo) {
     $createdAt = Carbon::now()->toDateTimeString();
     $url_id = $args['url_id'];
+    $responseData = null;
+    if(isset($urlRepo->findById($url_id)[0]['name'])) {
+        $urlName = $urlRepo->findById($url_id)[0]['name'];
+        $responseData = $checksRepo->getUrlResponse($urlName);
+        if (isset($responseData['flash']['type'])) {
+            $type = $responseData['flash']['type'];
+            $text = $responseData['flash']['text'];
+            $this->get('flash')->addMessage($type, $text);
+        }
+        $statusCode = $responseData['statusCode'];
+        $documentData = [];
+        if (isset($responseData['flash']['type']) && $responseData['flash']['type'] === 'success') {
+            $documentData = $checksRepo->getDocumentData($urlName);
+        }
+        //        file_put_contents('debug.log', print_r($documentData, true), FILE_APPEND);
+        $title = $documentData['title'] ?? '';
+        $h1 = $documentData['h1'] ?? '';
+        $description = $documentData['description'] ?? '';
 
-
-    $urlName = $urlRepo->findById($url_id)[0]['name'];
-    $responseData = $checksRepo->getUrlResponse($urlName);
-    $statusCode = $responseData['statusCode'];
-    $documentData = [];
-    if ($responseData['flash']['type'] === 'success') {
-        $documentData = $checksRepo->getDocumentData($urlName);
+        if ($responseData['flash']['type'] !== 'danger') {
+            $checksRepo->insert($url_id, $statusCode, $h1, $title, $description, $createdAt);
+        }
     }
 
-//        file_put_contents('debug.log', print_r($documentData, true), FILE_APPEND);
-    $title = $documentData['title'] ?? '';
-    $h1 = $documentData['h1'] ?? '';
-    $description = $documentData['description'] ?? '';
 
-    if ($responseData['flash']['type'] !== 'danger') {
-        $checksRepo->insert($url_id, $statusCode, $h1, $title, $description, $createdAt);
-    }
-
-    $this->get('flash')->addMessage($responseData['flash']['type'], $responseData['flash']['text']);
     $args['id'] = $args['url_id'];
     return $response->withRedirect($router->urlFor('url.show', $args));
 

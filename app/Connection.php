@@ -12,9 +12,9 @@ use PDOException;
  */
 class Connection
 {
-    private $conn;
+    private mixed $conn;
 
-    public function __construct()
+    public function connect(): ?PDO
     {
         $this->conn = null;
         $dotenvPath = __DIR__ . '/../.env';
@@ -41,8 +41,8 @@ class Connection
         );
 
         try {
-            $pdo = new PDO($conStr);
-            $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $this->conn = new PDO($conStr);
+            $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         } catch (PDOException $e) {
             echo 'Connection Error: ' . $e->getMessage();
         }

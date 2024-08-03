@@ -12,9 +12,9 @@ use Psr\Http\Message\ResponseInterface;
 
 class UrlChecker
 {
-    private $pdo;
+    private mixed $pdo;
 
-    public function __construct($pdo)
+    public function __construct(mixed $pdo)
     {
         $this->pdo = $pdo;
     }
